@@ -16,37 +16,56 @@
 	} = $props();
 </script>
 
-<div class="grid" class:small style:grid-template-columns="repeat({bingo.cols}, 1fr)">
-	{#each bingo.values as cell, i}
-		{#if cell === 'Gap'}
-			<div></div>
-		{:else if cell === 'Empty'}
-			<div class="cell free" class:won={won.has(i)}>Free</div>
-		{:else if ontoggle}
-			<button
-				class="cell"
-				class:marked={marked[i]}
-				class:won={won.has(i)}
-				aria-pressed={!!marked[i]}
-				onclick={() => ontoggle(i)}>{cell.Filled}</button
-			>
-		{:else}
-			<div class="cell">{cell.Filled}</div>
-		{/if}
-	{/each}
+<div class="grid-scroll">
+	<div class="grid" class:small style:grid-template-columns="repeat({bingo.cols}, var(--size))">
+		{#each bingo.values as cell, i}
+			{#if cell === 'Gap'}
+				<div></div>
+			{:else if cell === 'Empty'}
+				<div class="cell free" class:won={won.has(i)}>{small ? '' : '★ Free'}</div>
+			{:else if ontoggle}
+				<button
+					class="cell"
+					class:marked={marked[i]}
+					class:won={won.has(i)}
+					aria-pressed={!!marked[i]}
+					onclick={() => ontoggle(i)}>{cell.Filled}</button
+				>
+			{:else}
+				<div class="cell">{small ? '' : cell.Filled}</div>
+			{/if}
+		{/each}
+	</div>
 </div>
 
 <style>
-	.grid { display: grid; gap: 4px; max-width: 36rem; }
+	.grid { --size: var(--cell); display: grid; gap: var(--cell-gap); width: max-content; }
 	.cell {
-		aspect-ratio: 1; display: grid; place-items: center; padding: 0.25rem;
-		border: 1px solid #999; border-radius: 4px; background: none; font: inherit;
-		font-size: 0.85rem; text-align: center; overflow-wrap: anywhere; overflow: hidden;
+		width: var(--size);
+		height: var(--size);
+		display: grid;
+		place-items: center;
+		padding: 0.35rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		background: var(--surface);
+		color: var(--text);
+		font: inherit;
+		font-size: 0.85rem;
+		font-weight: 500;
+		line-height: 1.2;
+		text-align: center;
+		overflow-wrap: anywhere;
+		overflow: hidden;
+		transition: background 0.15s, transform 0.1s;
 	}
-	button.cell { cursor: pointer; }
-	.free { background: #eee; color: #666; }
-	.marked { background: #ffd54f; }
-	.won { background: #66bb6a; color: white; }
-	.small { max-width: 10rem; gap: 2px; }
-	.small .cell { font-size: 0.5rem; padding: 1px; border-radius: 2px; }
+	button.cell:hover { border-color: var(--primary); background: var(--surface-muted); color: var(--text); }
+	button.cell:active { transform: scale(0.96); }
+	.free { background: var(--surface-muted); color: var(--text-muted); font-weight: 600; }
+	.marked, button.marked:hover { background: var(--marked); border-color: var(--marked); color: var(--on-marked); }
+	.won, button.won:hover { background: var(--won); border-color: var(--won); color: var(--on-won); }
+
+	.small { --size: var(--cell-sm); gap: 3px; }
+	.small .cell { padding: 0; border-radius: 4px; }
+	.small .cell:not(.free) { background: var(--primary); border-color: var(--primary); opacity: 0.8; }
 </style>

@@ -35,10 +35,10 @@
 	}
 </script>
 
-<p><a href="/bingos/{data.bingo.id}">← Back</a></p>
+<a class="back" href="/bingos/{data.bingo.id}">← Back</a>
 <h1>Play</h1>
 
-<p aria-live="polite">
+<p class="status" class:complete aria-live="polite">
 	{#if complete}
 		<strong>BINGO!</strong>
 	{:else}
@@ -48,4 +48,9 @@
 
 <BingoGrid bingo={data.bingo} {marked} {won} ontoggle={toggle} />
 
-<p><button onclick={() => save([])}>Reset</button></p>
+<div class="actions"><button class="secondary" onclick={() => save([])}>Reset</button></div>
+
+<style>
+	.status { margin: 0 0 1rem; color: var(--text-muted); }
+	.complete { color: var(--won); font-size: 2rem; font-weight: 900; letter-spacing: 0.05em; }
+</style>

@@ -1,0 +1,174 @@
+:root {
+	color-scheme: light dark;
+
+	--bg: #f7f5fb;
+	--surface: #ffffff;
+	--surface-muted: #efebf7;
+	--border: #ddd6ea;
+	--text: #1f1a2e;
+	--text-muted: #6b6480;
+	--primary: #6d28d9;
+	--primary-hover: #5b21b6;
+	--on-primary: #ffffff;
+	--marked: #fbbf24;
+	--on-marked: #3b2a00;
+	--won: #16a34a;
+	--on-won: #ffffff;
+	--danger: #dc2626;
+
+	--radius: 8px;
+	--shadow: 0 1px 2px rgb(31 26 46 / 0.06), 0 4px 12px rgb(31 26 46 / 0.06);
+
+	/* Fixed bingo square sizes */
+	--cell: 6rem;
+	--cell-sm: 1.5rem;
+	--cell-gap: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #13111a;
+		--surface: #1d1a27;
+		--surface-muted: #282436;
+		--border: #373149;
+		--text: #ece9f5;
+		--text-muted: #a39cb8;
+		--primary: #a78bfa;
+		--primary-hover: #c4b5fd;
+		--on-primary: #1a1030;
+		--marked: #f59e0b;
+		--on-marked: #1f1400;
+		--won: #22c55e;
+		--on-won: #052e14;
+		--danger: #f87171;
+		--shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.3);
+	}
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--text);
+	font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+	line-height: 1.5;
+}
+
+h1 {
+	margin: 0 0 1rem;
+	font-size: 1.75rem;
+	letter-spacing: -0.01em;
+}
+
+a {
+	color: var(--primary);
+}
+
+a:hover {
+	color: var(--primary-hover);
+}
+
+/* Buttons: <button> and links styled as .button */
+button,
+.button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4rem;
+	padding: 0.5rem 1rem;
+	border: 1px solid var(--primary);
+	border-radius: var(--radius);
+	background: var(--primary);
+	color: var(--on-primary);
+	font: inherit;
+	font-weight: 600;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s;
+}
+
+button:hover,
+.button:hover {
+	background: var(--primary-hover);
+	border-color: var(--primary-hover);
+	color: var(--on-primary);
+}
+
+button:disabled {
+	opacity: 0.6;
+	cursor: default;
+}
+
+.secondary {
+	background: transparent;
+	color: var(--primary);
+}
+
+.secondary:hover {
+	background: var(--surface-muted);
+	color: var(--primary);
+}
+
+:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: 2px;
+}
+
+input,
+textarea {
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--surface);
+	color: var(--text);
+	font: inherit;
+}
+
+label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	font-weight: 500;
+}
+
+[role='alert'] {
+	margin: 0;
+	color: var(--danger);
+}
+
+.muted {
+	color: var(--text-muted);
+}
+
+.back {
+	display: inline-block;
+	margin-bottom: 0.75rem;
+	text-decoration: none;
+}
+
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 1.25rem 0;
+}
+
+.card {
+	padding: 1.5rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--surface);
+	box-shadow: var(--shadow);
+}
+
+/* Fixed-size grids can be wider than a phone; scroll them, not the page. */
+.grid-scroll {
+	max-width: 100%;
+	overflow-x: auto;
+	padding-bottom: 0.25rem;
+}

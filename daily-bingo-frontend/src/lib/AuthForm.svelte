@@ -25,8 +25,8 @@
 	}
 </script>
 
-<h1>{title}</h1>
-<form onsubmit={submit}>
+<form class="card" onsubmit={submit}>
+	<h1>{title}</h1>
 	<label>Email <input type="email" bind:value={email} required autocomplete="email" /></label>
 	<label>
 		Password
@@ -42,7 +42,6 @@
 </form>
 
 <style>
-	form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 20rem; }
-	label { display: flex; flex-direction: column; }
-	[role='alert'] { color: crimson; margin: 0; }
+	form { display: flex; flex-direction: column; gap: 1rem; max-width: 24rem; margin: 2rem auto; }
+	h1 { margin: 0; }
 </style>

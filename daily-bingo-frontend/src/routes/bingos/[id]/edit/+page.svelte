@@ -13,6 +13,6 @@
 	}
 </script>
 
-<p><a href="/bingos/{data.bingo.id}">← Back</a></p>
+<a class="back" href="/bingos/{data.bingo.id}">← Back</a>
 <h1>Edit Bingo</h1>
 <BingoEditor initial={data.bingo} submitLabel="Save" onsave={save} />

@@ -10,6 +10,6 @@
 	}
 </script>
 
-<p><a href="/bingos">← All bingos</a></p>
+<a class="back" href="/bingos">← All bingos</a>
 <h1>New Bingo</h1>
 <BingoEditor submitLabel="Create" onsave={create} />

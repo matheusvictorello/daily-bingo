@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { goto } from '$app/navigation';
 	import { auth, setToken } from '$lib/auth.svelte';
@@ -12,18 +13,19 @@
 </script>
 
 <svelte:head>
+	<title>Daily Bingo</title>
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
 <nav>
-	<a href="/bingos">Daily Bingo</a>
+	<a class="brand" href="/bingos">Daily Bingo</a>
 	<span>
 		{#if auth.token}
 			<a href="/bingos">Bingos</a>
-			<button onclick={logout}>Logout</button>
+			<button class="secondary" onclick={logout}>Logout</button>
 		{:else}
 			<a href="/login">Login</a>
-			<a href="/signup">Signup</a>
+			<a class="button" href="/signup">Signup</a>
 		{/if}
 	</span>
 </nav>
@@ -33,8 +35,19 @@
 </main>
 
 <style>
-	nav { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #ddd; }
+	nav {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.75rem 1rem;
+		border-bottom: 1px solid var(--border);
+		background: var(--surface);
+	}
 	nav span { display: flex; gap: 1rem; align-items: center; }
-	main { padding: 1rem; }
-	:global(.button) { display: inline-block; padding: 0.4rem 0.9rem; border: 1px solid currentColor; border-radius: 4px; text-decoration: none; }
+	nav a:not(:global(.button)) { font-weight: 500; text-decoration: none; }
+	.brand { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; }
+	main { max-width: 64rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
 </style>
