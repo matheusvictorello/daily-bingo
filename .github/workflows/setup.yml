@@ -19,7 +19,8 @@ jobs:
       - name: Write SSH key
         run: |
           install -m 600 /dev/null ~/ssh_pk
-          printf '%s\n' "$SSH_PK" > ~/ssh_pk
+          printf '%s\n' "$SSH_PK" | tr -d '\r' > ~/ssh_pk
+          ssh-keygen -y -f ~/ssh_pk > /dev/null || { echo "SSH_PK is not a valid unencrypted OpenSSH/PEM private key"; exit 1; }
 
       - name: Setup
         working-directory: ansible
