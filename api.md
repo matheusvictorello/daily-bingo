@@ -14,10 +14,10 @@
 
 ### Bingo
 
-- /bingo
-    - POST {} -> { id }
+- /bingos
+    - POST { cols, rows, values } -> { id }
 
-- /bingo/{bingo_id}
-    - GET -> {}
-    - PUT {} -> {}
+- /bingos/{bingo_id}
+    - GET -> { cols, rows, values }
+    - PUT { cols?, rows?, values? } -> { cols, rows, values }
     - DELETE

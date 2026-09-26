@@ -16,6 +16,7 @@ use std::sync::Arc;
 use crate::domain::auth::StaticPasswordManager;
 use crate::inbound::StaticAppState;
 use crate::inbound::router;
+use crate::outbound::postgres::PostgresBingoManager;
 use crate::outbound::postgres::PostgresUserManager;
 
 #[tokio::main]
@@ -53,6 +54,13 @@ async fn main() -> anyhow::Result<()> {
         PostgresUserManager::new(db.clone())
     );
     user_manager
+        .setup()
+        .await?;
+
+    let bingo_manager = Arc::new(
+        PostgresBingoManager::new(db.clone())
+    );
+    bingo_manager
         .setup()
         .await?;
 
