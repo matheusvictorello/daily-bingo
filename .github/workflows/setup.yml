@@ -1,11 +1,6 @@
 name: Setup docker compose
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - docker-compose.yml
-      - ansible/setup.yml
   workflow_dispatch:
 
 jobs:
