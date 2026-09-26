@@ -19,7 +19,7 @@ use crate::inbound::AppState;
 
 pub fn router<S: AppState>() -> Router<S> {
     Router::new()
-        .route("/", post(create_bingo::<S>))
+        .route("/", get(list_bingos::<S>).post(create_bingo::<S>))
         .route(
             "/:bingo_id",
             get(get_bingo::<S>)
@@ -31,6 +31,13 @@ pub fn router<S: AppState>() -> Router<S> {
 #[derive(Serialize)]
 pub struct CreateBingoResponse {
     id: Uuid,
+}
+
+#[derive(Serialize)]
+pub struct BingoResponse {
+    id: Uuid,
+    #[serde(flatten)]
+    info: BingoInfo,
 }
 
 #[derive(Deserialize)]
@@ -53,6 +60,20 @@ async fn create_bingo<S: AppState>(
         .await?;
 
     Ok(Json(CreateBingoResponse { id: id.0 }))
+}
+
+async fn list_bingos<S: AppState>(
+    State(state): State<S>,
+    Extension(user_id): Extension<UserId>,
+) -> Result<Json<Vec<BingoResponse>>, AppError> {
+    let bingos = state
+        .list_bingos(&user_id)
+        .await?
+        .into_iter()
+        .map(|(id, info)| BingoResponse { id: id.0, info })
+        .collect();
+
+    Ok(Json(bingos))
 }
 
 async fn get_bingo<S: AppState>(

@@ -82,6 +82,10 @@ where
         self.bingo_manager.create_bingo(bingo).await
     }
 
+    async fn list_bingos(&self, owner: &UserId) -> anyhow::Result<Vec<(BingoId, BingoInfo)>> {
+        self.bingo_manager.list_bingos(owner).await
+    }
+
     async fn get_bingo(&self, bingo: &Owned<UserId, BingoId>) -> anyhow::Result<Option<BingoInfo>> {
         self.bingo_manager.get_bingo(bingo).await
     }

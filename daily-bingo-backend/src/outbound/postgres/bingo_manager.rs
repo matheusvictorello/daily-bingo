@@ -55,6 +55,28 @@ impl BingoManager for PostgresBingoManager {
         Ok(BingoId(id))
     }
 
+    async fn list_bingos(&self, owner: &UserId) -> anyhow::Result<Vec<(BingoId, BingoInfo)>> {
+        let rows = sqlx::query_as::<_, (Uuid, i32, i32, String)>(
+            "SELECT id, cols, rows, cells::text FROM bingos WHERE owner_id = $1 ORDER BY created_at",
+        )
+        .bind(owner.0)
+        .fetch_all(&self.db)
+        .await?;
+
+        rows.into_iter()
+            .map(|(id, cols, rows, cells)| {
+                Ok((
+                    BingoId(id),
+                    BingoInfo {
+                        cols: cols.try_into()?,
+                        rows: rows.try_into()?,
+                        values: serde_json::from_str(&cells)?,
+                    },
+                ))
+            })
+            .collect()
+    }
+
     async fn get_bingo(&self, bingo: &Owned<UserId, BingoId>) -> anyhow::Result<Option<BingoInfo>> {
         let row = sqlx::query_as::<_, (i32, i32, String)>(
             "SELECT cols, rows, cells::text FROM bingos WHERE id = $1 AND owner_id = $2",

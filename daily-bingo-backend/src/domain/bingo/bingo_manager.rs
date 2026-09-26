@@ -8,6 +8,8 @@ use super::BingoInfo;
 pub trait BingoManager {
     async fn create_bingo(&self, bingo: Owned<UserId, BingoInfo>) -> anyhow::Result<BingoId>;
 
+    async fn list_bingos(&self, owner: &UserId) -> anyhow::Result<Vec<(BingoId, BingoInfo)>>;
+
     async fn get_bingo(&self, bingo: &Owned<UserId, BingoId>) -> anyhow::Result<Option<BingoInfo>>;
 
     /// Returns false if the bingo doesn't exist or isn't owned by the user.
