@@ -1,4 +1,5 @@
 # Deploys the artifacts produced by build.yml to an Ubuntu server.
+# Expects setup.yml to have run first (postgres).
 # Usage: JWT_SECRET=... ansible-playbook -i inventory.ini deploy.yml
 - name: Deploy daily-bingo
   hosts: web
@@ -14,27 +15,15 @@
         that: jwt_secret | length >= 32
         fail_msg: Set JWT_SECRET (at least 32 chars) in the environment.
 
-    - name: Install packages
+    - name: Install nginx
       ansible.builtin.apt:
-        name: [docker.io, docker-compose-v2, nginx]
+        name: nginx
         update_cache: true
 
     - name: Create app directory
       ansible.builtin.file:
         path: "{{ app_dir }}"
         state: directory
-
-    - name: Copy docker-compose.yml
-      ansible.builtin.copy:
-        src: "{{ root }}/docker-compose.yml"
-        dest: "{{ app_dir }}/docker-compose.yml"
-
-    - name: Start postgres
-      ansible.builtin.command:
-        cmd: docker compose up -d
-        chdir: "{{ app_dir }}"
-      register: compose
-      changed_when: "'Started' in compose.stderr or 'Created' in compose.stderr"
 
     - name: Copy backend binary
       ansible.builtin.copy:

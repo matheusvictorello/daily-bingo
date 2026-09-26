@@ -1,0 +1,31 @@
+name: Setup docker compose
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docker-compose.yml
+      - ansible/setup.yml
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    env:
+      SSH_PK: ${{ secrets.SSH_PK }}
+      # ponytail: trusts the server's host key on first sight, pin it via a known_hosts secret to stop MITM
+      ANSIBLE_HOST_KEY_CHECKING: "False"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ansible
+        run: pipx install ansible-core
+
+      - name: Write SSH key
+        run: |
+          install -m 600 /dev/null ~/ssh_pk
+          printf '%s\n' "$SSH_PK" > ~/ssh_pk
+
+      - name: Setup
+        working-directory: ansible
+        run: ansible-playbook -i inventory.ini --private-key ~/ssh_pk setup.yml
