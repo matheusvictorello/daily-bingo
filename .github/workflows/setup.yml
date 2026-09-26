@@ -6,6 +6,7 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    environment: Prod
     env:
       SSH_PK: ${{ secrets.SSH_PK }}
       # ponytail: trusts the server's host key on first sight, pin it via a known_hosts secret to stop MITM
