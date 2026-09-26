@@ -6,11 +6,6 @@
   vars:
     app_dir: /opt/daily-bingo
   tasks:
-    - name: Install docker
-      ansible.builtin.apt:
-        name: [docker.io, docker-compose-v2]
-        update_cache: true
-
     - name: Create app directory
       ansible.builtin.file:
         path: "{{ app_dir }}"
