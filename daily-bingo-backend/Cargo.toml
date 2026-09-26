@@ -1,0 +1,22 @@
+[package]
+name = "daily-bingo-backend"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.104"
+argon2 = "0.5"
+axum = { version = "0.7", features = ["macros"] }
+tokio = { version = "1", features = ["full"] }
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio-rustls", "uuid", "chrono", "rust_decimal"] }
+rust_decimal = { version = "1", features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+jsonwebtoken = "9"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+dotenvy = "0.15"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tower-http = { version = "0.5", features = ["trace"] }
+trait-variant = "0.1.3"
