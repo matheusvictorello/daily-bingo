@@ -15,6 +15,7 @@
 ### Bingo
 
 - /bingos
+    - GET -> \[{ id, cols, rows, values }\]
     - POST { cols, rows, values } -> { id }
 
 - /bingos/{bingo_id}

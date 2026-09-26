@@ -9,6 +9,7 @@ pub enum AppError {
     Internal(String),
     Unauthorized,
     NotFound,
+    BadRequest(String),
 }
 
 impl From<anyhow::Error> for AppError {
@@ -30,6 +31,7 @@ impl IntoResponse for AppError {
             }
             AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "invalid credentials".to_string()),
             AppError::NotFound => (StatusCode::NOT_FOUND, "not found".to_string()),
+            AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
         };
 
         (status, Json(json!({ "error": message }))).into_response()

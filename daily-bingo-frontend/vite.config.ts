@@ -16,5 +16,11 @@ export default defineConfig({
 			// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 			adapter: adapter()
 		})
-	]
+	],
+	server: {
+		// Backend has no CORS; proxy /api/* to it in dev.
+		proxy: {
+			'/api': { target: 'http://localhost:3000', rewrite: (p) => p.replace(/^\/api/, '') }
+		}
+	}
 });

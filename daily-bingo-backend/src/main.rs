@@ -67,6 +67,7 @@ async fn main() -> anyhow::Result<()> {
     let app = router(StaticAppState {
         password_manager,
         user_manager,
+        bingo_manager,
     });
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")

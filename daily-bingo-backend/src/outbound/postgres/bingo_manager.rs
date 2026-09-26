@@ -39,15 +39,8 @@ impl PostgresBingoManager {
 impl BingoManager for PostgresBingoManager {
     async fn create_bingo(&self, bingo: Owned<UserId, BingoInfo>) -> anyhow::Result<BingoId> {
         let info = bingo.resource;
-        anyhow::ensure!(
-            info.values.len() == info.cols * info.rows,
-            "bingo has {} cells, expected {}x{}",
-            info.values.len(),
-            info.cols,
-            info.rows,
-        );
-
         let id = Uuid::new_v4();
+
         sqlx::query(
             "INSERT INTO bingos (id, owner_id, cols, rows, cells) VALUES ($1, $2, $3, $4, $5::jsonb)",
         )
@@ -60,5 +53,53 @@ impl BingoManager for PostgresBingoManager {
         .await?;
 
         Ok(BingoId(id))
+    }
+
+    async fn get_bingo(&self, bingo: &Owned<UserId, BingoId>) -> anyhow::Result<Option<BingoInfo>> {
+        let row = sqlx::query_as::<_, (i32, i32, String)>(
+            "SELECT cols, rows, cells::text FROM bingos WHERE id = $1 AND owner_id = $2",
+        )
+        .bind(bingo.resource.0)
+        .bind(bingo.owner.0)
+        .fetch_optional(&self.db)
+        .await?;
+
+        row.map(|(cols, rows, cells)| {
+            Ok(BingoInfo {
+                cols: cols.try_into()?,
+                rows: rows.try_into()?,
+                values: serde_json::from_str(&cells)?,
+            })
+        })
+        .transpose()
+    }
+
+    async fn update_bingo(
+        &self,
+        bingo: &Owned<UserId, BingoId>,
+        info: BingoInfo,
+    ) -> anyhow::Result<bool> {
+        let result = sqlx::query(
+            "UPDATE bingos SET cols = $3, rows = $4, cells = $5::jsonb WHERE id = $1 AND owner_id = $2",
+        )
+        .bind(bingo.resource.0)
+        .bind(bingo.owner.0)
+        .bind(i32::try_from(info.cols)?)
+        .bind(i32::try_from(info.rows)?)
+        .bind(serde_json::to_string(&info.values)?)
+        .execute(&self.db)
+        .await?;
+
+        Ok(result.rows_affected() > 0)
+    }
+
+    async fn delete_bingo(&self, bingo: &Owned<UserId, BingoId>) -> anyhow::Result<bool> {
+        let result = sqlx::query("DELETE FROM bingos WHERE id = $1 AND owner_id = $2")
+            .bind(bingo.resource.0)
+            .bind(bingo.owner.0)
+            .execute(&self.db)
+            .await?;
+
+        Ok(result.rows_affected() > 0)
     }
 }
