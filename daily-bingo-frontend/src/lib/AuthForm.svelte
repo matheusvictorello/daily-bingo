@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isHttpError } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
 	import { authenticate } from '$lib/auth.svelte';
 
@@ -15,9 +16,9 @@
 		loading = true;
 		try {
 			await authenticate(path, email, password);
-			await goto('/');
+			await goto('/bingos');
 		} catch (err) {
-			error = (err as Error).message;
+			error = isHttpError(err) ? err.body.message : 'Could not reach the server';
 		} finally {
 			loading = false;
 		}

@@ -16,9 +16,10 @@
 </svelte:head>
 
 <nav>
-	<a href="/">Daily Bingo</a>
+	<a href="/bingos">Daily Bingo</a>
 	<span>
 		{#if auth.token}
+			<a href="/bingos">Bingos</a>
 			<button onclick={logout}>Logout</button>
 		{:else}
 			<a href="/login">Login</a>
@@ -35,4 +36,5 @@
 	nav { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #ddd; }
 	nav span { display: flex; gap: 1rem; align-items: center; }
 	main { padding: 1rem; }
+	:global(.button) { display: inline-block; padding: 0.4rem 0.9rem; border: 1px solid currentColor; border-radius: 4px; text-decoration: none; }
 </style>
