@@ -1,0 +1,132 @@
+# Deploys the artifacts produced by build.yml to an Ubuntu server.
+# Usage: JWT_SECRET=... ansible-playbook -i inventory.ini deploy.yml
+- name: Deploy daily-bingo
+  hosts: web
+  become: true
+  vars:
+    root: "{{ playbook_dir }}/.."
+    app_dir: /opt/daily-bingo
+    web_dir: /var/www/daily-bingo
+    jwt_secret: "{{ lookup('env', 'JWT_SECRET') }}"
+  tasks:
+    - name: Require JWT_SECRET
+      ansible.builtin.assert:
+        that: jwt_secret | length >= 32
+        fail_msg: Set JWT_SECRET (at least 32 chars) in the environment.
+
+    - name: Install packages
+      ansible.builtin.apt:
+        name: [docker.io, docker-compose-v2, nginx]
+        update_cache: true
+
+    - name: Create app directory
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+
+    - name: Copy docker-compose.yml
+      ansible.builtin.copy:
+        src: "{{ root }}/docker-compose.yml"
+        dest: "{{ app_dir }}/docker-compose.yml"
+
+    - name: Start postgres
+      ansible.builtin.command:
+        cmd: docker compose up -d
+        chdir: "{{ app_dir }}"
+      register: compose
+      changed_when: "'Started' in compose.stderr or 'Created' in compose.stderr"
+
+    - name: Copy backend binary
+      ansible.builtin.copy:
+        src: "{{ root }}/daily-bingo-backend/target/release/daily-bingo-backend"
+        dest: "{{ app_dir }}/daily-bingo-backend"
+        mode: "0755"
+      notify: Restart backend
+
+    - name: Write backend environment
+      ansible.builtin.copy:
+        dest: /etc/daily-bingo.env
+        mode: "0600"
+        content: |
+          DATABASE_URL=postgres://daily-bingo:daily-bingo@127.0.0.1:5433/daily-bingo
+          JWT_SECRET={{ jwt_secret }}
+      no_log: true
+      notify: Restart backend
+
+    - name: Install backend service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/daily-bingo.service
+        content: |
+          [Unit]
+          Description=daily-bingo backend
+          After=network.target docker.service
+
+          [Service]
+          ExecStart={{ app_dir }}/daily-bingo-backend
+          WorkingDirectory={{ app_dir }}
+          EnvironmentFile=/etc/daily-bingo.env
+          DynamicUser=true
+          Restart=on-failure
+          RestartSec=2
+
+          [Install]
+          WantedBy=multi-user.target
+      notify: Restart backend
+
+    - name: Enable backend
+      ansible.builtin.systemd_service:
+        name: daily-bingo
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    # ponytail: copy never deletes stale _app assets, switch to synchronize --delete if the dir grows
+    - name: Copy frontend
+      ansible.builtin.copy:
+        src: "{{ root }}/daily-bingo-frontend/build/"
+        dest: "{{ web_dir }}/"
+
+    - name: Configure nginx
+      ansible.builtin.copy:
+        dest: /etc/nginx/sites-available/daily-bingo
+        content: |
+          server {
+              listen 80 default_server;
+              root {{ web_dir }};
+
+              location / {
+                  try_files $uri $uri/ /200.html;
+              }
+
+              location /api/ {
+                  proxy_pass http://127.0.0.1:3000/;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              }
+          }
+      notify: Reload nginx
+
+    - name: Enable nginx site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/daily-bingo
+        dest: /etc/nginx/sites-enabled/daily-bingo
+        state: link
+      notify: Reload nginx
+
+    - name: Disable default nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reload nginx
+
+  handlers:
+    - name: Restart backend
+      ansible.builtin.systemd_service:
+        name: daily-bingo
+        state: restarted
+        daemon_reload: true
+
+    - name: Reload nginx
+      ansible.builtin.systemd_service:
+        name: nginx
+        state: reloaded

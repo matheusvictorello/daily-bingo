@@ -1,0 +1,56 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install ansible
+        run: pipx install ansible-core
+
+      - name: Build
+        run: ansible-playbook ansible/build.yml
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: |
+            daily-bingo-backend/target/release/daily-bingo-backend
+            daily-bingo-frontend/build/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      SSH_PK: ${{ secrets.SSH_PK }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      # ponytail: trusts the server's host key on first sight, pin it via a known_hosts secret to stop MITM
+      ANSIBLE_HOST_KEY_CHECKING: "False"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: build
+
+      - name: Install ansible
+        run: pipx install ansible-core
+
+      - name: Write SSH key
+        run: |
+          install -m 600 /dev/null ~/ssh_pk
+          printf '%s\n' "$SSH_PK" > ~/ssh_pk
+
+      - name: Deploy
+        working-directory: ansible
+        run: ansible-playbook -i inventory.ini --private-key ~/ssh_pk deploy.yml

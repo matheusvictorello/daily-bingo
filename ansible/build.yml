@@ -1,0 +1,23 @@
+# Builds release artifacts on the control node.
+# Run from Linux/WSL: the backend binary must be built for the server's OS.
+- name: Build daily-bingo
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    root: "{{ playbook_dir }}/.."
+  tasks:
+    - name: Build backend
+      ansible.builtin.command:
+        cmd: cargo build --release
+        chdir: "{{ root }}/daily-bingo-backend"
+
+    - name: Install frontend dependencies
+      ansible.builtin.command:
+        cmd: npm ci
+        chdir: "{{ root }}/daily-bingo-frontend"
+
+    - name: Build frontend
+      ansible.builtin.command:
+        cmd: npm run build
+        chdir: "{{ root }}/daily-bingo-frontend"
